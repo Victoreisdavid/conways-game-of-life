@@ -8,6 +8,7 @@ Se você quiser informações detalhadas sobre **conway's game of life**, [pode 
 Next.js foi usado para fazer o website, portanto você deve seguir as seguintes etapas:
 - Compilar as páginas usando o comando `npm run next-build`
 - Rodar seu webserver usando o comando `npm run next-start`
+
 Você também pode usar `npm run next-dev` para rodar em modo de desenvolvimento.
 
 ## Créditos
