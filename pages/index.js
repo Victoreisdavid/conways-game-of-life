@@ -188,7 +188,7 @@ function Index() {
             updateCurrGen()
             updateWorld()
             if(!started) return;
-            setTimeout(startGame, 100);
+            setTimeout(startGame, 600);
         }
         
         document.querySelector("#start").addEventListener('click', () => {
