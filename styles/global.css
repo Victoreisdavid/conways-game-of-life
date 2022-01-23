@@ -1,0 +1,74 @@
+:root {
+    --color1: #2f3036;
+    --cell-color-alive: #0F379D
+}
+
+* {
+    margin: 0px;
+    font-family: sans-serif;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--color1);
+    color: #f3f3f3f6;
+}
+
+#world {
+    padding-bottom: 10px;
+}
+table {
+    background-color: var(--color1);
+    margin: auto;
+    margin-top: 5px;
+    box-shadow: 0 0 6px var(--cell-color-alive);
+}
+td {
+    width: 15px;
+    height: 15px;
+}
+
+td.dead {
+    background-color: transparent;
+    border: none;
+}
+
+td.alive {
+    background-color: var(--cell-color-alive);
+    border: none;
+    box-shadow: 0 0 6px var(--cell-color-alive);
+}
+
+button {
+    background-color: var(--color1);
+    color: #f3f3f3f6;
+    border: none;
+    padding: 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+    outline: none;
+}
+
+div.buttons {
+    width: fit-content;
+    text-align: center;
+    margin: auto;
+    margin-top: 10px;
+}
+
+div#game-config {
+    margin-top: 10%;
+}
+
+div#game-config #content {
+    width: fit-content;
+    margin: auto;
+}
+
+div#game-config #content h1 {
+    margin-bottom: 12px;
+}
+
+input[type=checkbox] {
+    transform: scale(1.3);
+}
