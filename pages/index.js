@@ -1,237 +1,88 @@
 import { useEffect } from 'react';
+import gameOfLife from '../game';
 
 function Index() {
     useEffect(() => {
-        const screen_height = window.innerHeight;
-        const screen_width = window.innerWidth;
-        const rows = Math.round(screen_height / 20) // altura
-        const cols = Math.round(screen_width / 18) // largura
-        let currGen = [rows]
-        let nextGen = [rows]
-        let started = false
-        let random_cells = []
-        document.querySelector("#cells-number").textContent = `Número de quadradinhos que serão gerados: ${rows + cols}`
-        function createGenArrays() {
-            for(let i = 0; i < rows; i++) {
-                currGen[i] = new Array(cols)
-                nextGen[i] = new Array(cols)
-            }
-        }
-
-        function initGenArrays() {
-            for(let i = 0; i < rows; i++) {
-                for(let j = 0; j < cols; j++) {
-                    currGen[i][j] = 0
-                    nextGen[i][j] = 0
-                }
-            }
-        }
-
-        const progress = document.querySelector("#progress")
-        const time_ = document.querySelector("#time")
-        async function delay() {
-            await new Promise(resolve => setTimeout(resolve, 30));
-        }
-
-        async function createWorld(generate_random_cells = false) {
-            let time = Date.now();
-            let world = document.querySelector('#world');
-            let tbl = document.createElement('table');
-            tbl.setAttribute('id','worldgrid');
-            world.appendChild(tbl);
-            for (let i = 0; i < rows; i++) {
-                let tr = document.createElement('tr');
-                for (let j = 0; j < cols; j++) {
-                    let cell = document.createElement('td');
-                    cell.setAttribute("id", `${i}_${j}`)
-                    cell.addEventListener('click', cellClick);
-                    if(generate_random_cells) {
-                        const random = Math.random()
-                        if(random < 0.3) {
-                            cell.setAttribute("class", "alive")
-                            random_cells.push(`${i}_${j}`)
-                        } else {
-                            cell.setAttribute("class", "dead")
-                        }
-                    } else {
-                        cell.setAttribute("class", "dead")
-                    }
-                    tr.appendChild(cell);
-                    let progressS = Math.round(((i * cols) + j) / (rows * cols) * 100)
-                    if(progressS > 100) progressS = 100;
-                    progress.textContent = `Gerando mundo: ${progressS}%`;
-                }
-                await delay();
-                tbl.appendChild(tr);
-            }
-            time = Date.now() - time;
-            time = time > 1000 ? time / 1000 + ' segundos' : time + ' milissegundos';
-            time_.innerHTML = `Tempo levado: ${time}`;
-            document.querySelectorAll("button").forEach(button => button.hidden = false);
-        }
-
-        function cellClick() {
-            let loc = this.id.split("_")
-            let row = Number(loc[0])
-            let col = Number(loc[1])
-
-            if(this.className == "alive") {
-                this.setAttribute("class", "dead")
-                currGen[row][col] = 0
-            } else {
-                this.setAttribute("class", "alive")
-                currGen[row][col] = 1
-            }
-
-        }
-
-        function getNeighborCount(row, col) {
-            let count = 0
-            let nrow = Number(row)
-            let ncol = Number(col)
-            if(nrow - 1 >= 0) {
-                if(currGen[nrow - 1][ncol] == 1) {
-                    count++;
-                }
-            }
-            if(nrow - 1 >= 0 && ncol - 1 >= 0) {
-                if(currGen[nrow - 1][ncol - 1] == 1) {
-                    count++;
-                }
-            }
-            if(nrow - 1 >= 0 && ncol + 1 < cols) {
-                if(currGen[nrow - 1][ncol + 1] == 1) {
-                    count++;
-                }
-            }
-            if(ncol -1 >= 0) {
-                if(currGen[nrow][ncol - 1] == 1) {
-                    count++;
-                }
-            }
-            if(ncol + 1 < cols) {
-                if(currGen[nrow][ncol + 1] == 1) {
-                    count++;
-                }
-            }
-            if(nrow + 1 < rows && ncol - 1 >= 0) {
-                if(currGen[nrow + 1][ncol - 1] == 1) {
-                    count++;
-                }
-            }
-            if(nrow + 1 < rows && ncol + 1 < cols) {
-                if(currGen[nrow + 1][ncol + 1] == 1) {
-                    count++;
-                }
-            }
-            if(nrow + 1 < rows) {
-                if(currGen[nrow + 1][ncol] == 1) {
-                    count++;
-                }
-            }
-            return count
-        }
+        const canvas = document.querySelector("#game")
+        const ctx = canvas.getContext("2d")
+        const start = document.querySelector("#start")
+        const stop = document.querySelector("#stop")
+        const generate = document.querySelector("#generate-cells")
         
-        function createNextGen() {
-            for(let row in currGen) {
-                for(let col in currGen[row]) {
-                    let neighbors = getNeighborCount(row, col)
-                    if(currGen[row][col] == 1) {
-                        if(neighbors < 2) {
-                            nextGen[row][col] = 0
-                        } else if(neighbors == 2 || neighbors == 3) {
-                            nextGen[row][col] = 1
-                        } else if(neighbors > 3) {
-                            nextGen[row][col] = 0
-                        }
-                    } else if(currGen[row][col] == 0) {
-                        if(neighbors == 3) {
-                            nextGen[row][col] = 1
-                        }
-                    }
-                }
-            }
-        }
+        let running = false
 
-        function updateCurrGen() {
-            for(let row in currGen) {
-                for(let col in currGen[row]) {
-                    currGen[row][col] = nextGen[row][col]
-                    nextGen[row][col] = 0
-                    random_cells.forEach(cell => {
-                        const loc = cell.split("_")
-                        const row = Number(loc[0])
-                        const col = Number(loc[1])
-                        currGen[row][col] = 1
-                    })
-                }
-            }
-            random_cells = []
-        }
+        canvas.width = window.innerWidth * 0.9
+        canvas.height = window.innerHeight * 0.9
+        const game = new gameOfLife(canvas, ctx)
+        game.setUp()
+        game.generateCells(0)
+        game.fillCells()
 
-        function updateWorld() {
-            let cell = ""
-            for(let row in currGen) {
-                for(let col in currGen[row]) {
-                    cell = document.getElementById(`${row}_${col}`)
-                    if(currGen[row][col] == 0) {
-                        cell.setAttribute("class", "dead")
-                    } else {
-                        cell.setAttribute("class", "alive")
-                    }
-                }
-            }
-        }
+        generate.addEventListener("click", () => {
+            const spawnProb = document.querySelector("#cell-chance").value / 100
+            const cellSize = document.querySelector("#cell-size").value || 5
 
-        function startGame() {
-            createNextGen()
-            updateCurrGen()
-            updateWorld()
-            if(!started) return;
-            setTimeout(startGame, 600);
-        }
-        
-        document.querySelector("#start").addEventListener('click', () => {
-            if(started) return;
-            started = true;
-            startGame();
+            // ajusta o canvas
+            canvas.width = window.innerWidth * 0.9
+            canvas.height = window.innerHeight * 0.9
+
+            // Define os tamanhos
+            game.cell_size = cellSize
+            game.cells_in_column = Math.floor(canvas.width / game.cell_size)
+            game.cells_in_rows = Math.floor(canvas.height / game.cell_size)
+
+            game.setUp()
+
+            // Deixa o canvas vazio
+            game.generateCells(0)
+            game.fillCells()
+
+            // Gera as células
+            game.generateCells(spawnProb)
+            game.fillCells()
         })
 
-        document.querySelector("#stop").addEventListener('click', () => {
-            started = false
+        start.addEventListener("click", () => {
+            console.log("--------------- GAME IS NOW RUNNING ---------------")
+            running = true
+            run()
         })
 
-        document.querySelector("#generate-world").addEventListener('click', () => {
-            const generate_random_cells = document.querySelector("#random-cells").checked
-            document.querySelector("#game-config").remove()
-            document.querySelector("#game").hidden = false
-            createWorld(generate_random_cells);
-            createGenArrays();
-            initGenArrays();
+        stop.addEventListener("click", () => {
+            console.log("--------------- GAME STOPPED ---------------")
+            running = false
+            // se running for definido para false, o próximo frame não será rodado.
         })
+
+        // roda os frames
+        function run() {
+            if (running) {
+                requestAnimationFrame(run)
+                game.run()
+            }
+        }
 
     }, [])
     return (
         <>
-            <div id="game" hidden>
-                <p id="progress">Gerando mundo: 0%</p>
-                <p id="time">Tempo levado: calculando...</p>
-                <p id="cells-number">Número de quadradinhos que serão gerados: 0</p>
-                <div id="world" />
-                <div className="buttons">
-                    <button id="start" hidden>Começar</button>
-                    <button id="stop" hidden>Pausar</button>
+            <header>
+                <h1>"Jogo da vida" de conways</h1>
+                <p>O jogo com vida própria</p>
+            </header>
+
+            <div id="configs">
+                <h2>Configurações</h2>
+                <p>Probabilidade de nascer uma célula viva:</p>
+                <input type="number" id="cell-chance" defaultValue={30} />
+                <p>Tamanho em pixels das células</p>
+                <input type="number" id="cell-size" defaultValue={5} />
+                <div id="buttons">
+                    <button id="start">Começar jogo</button>
+                    <button id="stop">Parar jogo</button>
+                    <button id="generate-cells">Gerar células</button>
                 </div>
             </div>
-            <div id="game-config">
-                <div id="content">
-                    <h1>Configuração do jogo</h1>
-                    <input type="checkbox" id="random-cells" /> Gerar células aleatórias? <br />
-                    <div className="buttons">
-                        <button id="generate-world">Gerar mundo</button>
-                    </div>
-                </div>
-            </div>
+            <canvas id="game" />
         </>
     )
 }
