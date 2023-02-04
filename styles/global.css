@@ -74,6 +74,7 @@ header {
     margin: 10px;
     color: #f3f3f3f6;
     border: none;
+    cursor: pointer;
     transition-duration: 250ms;
 }
 
